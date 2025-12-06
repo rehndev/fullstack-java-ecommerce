@@ -10,6 +10,7 @@ import com.java.ecommerce.repository.ProductRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -77,6 +78,38 @@ public class OrderService {
                 .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
                 .map(this::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteOrder(Long id, User user) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+
+        // Only admin or the order owner can delete
+        if (user.getRole() != Role.ADMIN && (order.getUser() == null || !order.getUser().getId().equals(user.getId()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this order");
+        }
+
+        // If requester is a regular customer, only allow deleting NEW orders (cancellation)
+        if (user.getRole() != Role.ADMIN && order.getStatus() != OrderStatus.NEW) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only NEW orders can be cancelled by the customer");
+        }
+
+        // Restore stock for each item
+        for (OrderItem item : order.getItems()) {
+            Product product = item.getProduct();
+            if (product != null) {
+                product.setStock(product.getStock() + item.getQuantity());
+            }
+        }
+
+        // Persist updated product stock
+        productRepository.saveAll(
+                order.getItems().stream().map(OrderItem::getProduct).toList()
+        );
+
+        // Delete the order (cascade will remove order items)
+        orderRepository.delete(order);
     }
 
     private OrderResponse toResponse(Order order) {

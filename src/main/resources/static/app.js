@@ -340,8 +340,45 @@ function renderOrders(orders) {
         });
         card.appendChild(list);
 
+        // Actions: allow cancelling by owner (if NEW) or by admin (any status)
+        const actions = document.createElement('div');
+        actions.className = 'order-actions';
+        const canCancel = currentUser && (currentUser.role === 'ADMIN' || (currentUser.id === o.userId && o.status === 'NEW'));
+        if (canCancel) {
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.onclick = async (ev) => {
+                ev.stopPropagation();
+                await cancelOrder(o.id);
+            };
+            actions.appendChild(cancelBtn);
+        }
+        card.appendChild(actions);
+
         container.appendChild(card);
     });
+}
+
+async function cancelOrder(id) {
+    if (!currentUser) {
+        showError('Login first');
+        return;
+    }
+    if (!confirm('Cancel this order?')) return;
+    try {
+        const res = await fetch(`${API_BASE}/orders/${id}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || 'Could not cancel order');
+        }
+        await loadOrders();
+        showError('Order cancelled');
+    } catch (e) {
+        showError(e.message);
+    }
 }
 
 // ADMIN product form ----------------------------------

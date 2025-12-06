@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "*", allowCredentials = "true")
 public class OrderController {
 
     private final OrderService orderService;
@@ -42,5 +41,11 @@ public class OrderController {
         }
         // Customer: only own orders
         return orderService.findOrdersForUser(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteOrder(@PathVariable Long id, HttpSession session) {
+        User user = authContext.requireUser(session);
+        orderService.deleteOrder(id, user);
     }
 }

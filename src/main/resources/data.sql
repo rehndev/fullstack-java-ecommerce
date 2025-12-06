@@ -12,6 +12,3 @@ VALUES
   (4, 'Bug Spray for Software Bugs', 'Think your code has bugs? Just spray them away!', 24.00, 'https://via.placeholder.com/150', 8);
   (5, 'Add to Cart Button (Physical)', 'A physical button to add items to your cart', 15.00, 'https://via.placeholder.com/150', 20);
 
-
-INSERT INTO products (id, name, description, price, image_url, stock)
-

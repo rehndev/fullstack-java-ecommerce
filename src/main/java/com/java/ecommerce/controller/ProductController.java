@@ -19,7 +19,7 @@ public class ProductController {
     private final AuthContext authContext;
 
     public ProductController(ProductService productService,
-                             AuthContext authContext) {
+            AuthContext authContext) {
         this.productService = productService;
         this.authContext = authContext;
     }
@@ -36,7 +36,7 @@ public class ProductController {
 
     @PostMapping
     public Product createProduct(@Valid @RequestBody ProductRequest req,
-                                 HttpSession session) {
+            HttpSession session) {
         // Admin only
         User admin = authContext.requireAdmin(session);
         return productService.create(req);
@@ -44,15 +44,15 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public Product updateProduct(@PathVariable Long id,
-                                 @Valid @RequestBody ProductRequest req,
-                                 HttpSession session) {
+            @Valid @RequestBody ProductRequest req,
+            HttpSession session) {
         User admin = authContext.requireAdmin(session);
         return productService.update(id, req);
     }
 
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id,
-                              HttpSession session) {
+            HttpSession session) {
         User admin = authContext.requireAdmin(session);
         productService.delete(id);
     }

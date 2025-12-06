@@ -209,10 +209,11 @@ function renderCart() {
     const container = document.getElementById('cart');
     container.innerHTML = '';
     if (cart.length === 0) {
-        container.textContent = 'Your cart is empty.';
+        container.setAttribute('data-empty-message', 'Your cart is empty');
         document.getElementById('cart-total').textContent = '0';
         return;
     }
+    container.removeAttribute('data-empty-message');
 
     cart.forEach((item, idx) => {
         const row = document.createElement('div');
@@ -315,9 +316,10 @@ function renderOrders(orders) {
     const container = document.getElementById('orders');
     container.innerHTML = '';
     if (!orders || orders.length === 0) {
-        container.textContent = 'No orders yet.';
+        container.setAttribute('data-empty-message', 'No orders yet');
         return;
     }
+    container.removeAttribute('data-empty-message');
 
     orders.forEach(o => {
         const card = document.createElement('div');

@@ -1,0 +1,79 @@
+<!-- src/main/resources/static/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mini E-Commerce</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top-bar">
+    <h1>E-Commerce</h1>
+    <div id="user-info"></div>
+</header>
+
+<main class="layout">
+    <!-- LEFT: Auth and admin -->
+    <section class="panel">
+        <h2>Authentication</h2>
+        <div id="auth-forms">
+            <div class="card">
+                <h3>Register</h3>
+                <input id="reg-name" type="text" placeholder="Name">
+                <input id="reg-email" type="email" placeholder="Email">
+                <input id="reg-password" type="password" placeholder="Password">
+                <button onclick="register()">Register</button>
+            </div>
+            <div class="card">
+                <h3>Login</h3>
+                <input id="login-email" type="email" placeholder="Email">
+                <input id="login-password" type="password" placeholder="Password">
+                <button onclick="login()">Login</button>
+                <button class="secondary" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div id="admin-panel" class="card hidden">
+            <h2>Admin: Manage Products</h2>
+            <input id="prod-id" type="hidden">
+            <input id="prod-name" type="text" placeholder="Name">
+            <textarea id="prod-desc" placeholder="Description"></textarea>
+            <input id="prod-price" type="number" step="0.01" placeholder="Price">
+            <input id="prod-image" type="text" placeholder="Image URL (optional)">
+            <input id="prod-stock" type="number" placeholder="Stock">
+            <div class="btn-row">
+                <button onclick="createOrUpdateProduct()">Save Product</button>
+                <button class="secondary" onclick="clearProductForm()">Clear</button>
+            </div>
+            <p class="hint">Click a product in the list to edit or delete it.</p>
+        </div>
+    </section>
+
+    <!-- CENTER: Products -->
+    <section class="panel">
+        <h2>Products</h2>
+        <div id="products" class="product-grid"></div>
+    </section>
+
+    <!-- RIGHT: Cart and orders -->
+    <section class="panel">
+        <h2>Shopping Cart</h2>
+        <div id="cart"></div>
+        <div class="cart-footer">
+            <span>Total: <span id="cart-total">0</span> €</span>
+            <button onclick="checkout()">Checkout</button>
+        </div>
+
+        <h2>My Orders</h2>
+        <div id="orders"></div>
+    </section>
+</main>
+
+<footer class="footer">
+    <span>Demo only – no real payments.</span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

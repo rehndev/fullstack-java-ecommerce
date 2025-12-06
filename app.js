@@ -1,7 +1,16 @@
 // Use deployed backend URL for GitHub Pages, localhost for local development
 const API_BASE = window.location.hostname === 'rehndev.github.io' 
-    ? 'https://your-backend-url.com/api'  // TODO: Replace with your deployed backend URL
+    ? null  // Use mock data for GitHub Pages demo
     : '/api';  // Local development
+
+// Mock data for demo when backend isn't available
+const MOCK_PRODUCTS = [
+    {id: 1, name: 'Invisible Keyboard', description: 'Perfect for typing imaginary emails', price: 9.99, imageUrl: 'https://via.placeholder.com/150', stock: 10},
+    {id: 2, name: 'Wireless Extension Cord', description: '0% cables, 100% confusion', price: 14.50, imageUrl: 'https://via.placeholder.com/150', stock: 5},
+    {id: 3, name: 'Decision Coin Flipper', description: 'Just blame the coin', price: 24.00, imageUrl: 'https://via.placeholder.com/150', stock: 8},
+    {id: 4, name: 'Bug Spray for Software Bugs', description: 'Think your code has bugs? Just spray them away!', price: 24.00, imageUrl: 'https://via.placeholder.com/150', stock: 8},
+    {id: 5, name: 'Add to Cart Button (Physical)', description: 'A physical button to add items to your cart', price: 15.00, imageUrl: 'https://via.placeholder.com/150', stock: 20}
+];
 
 let currentUser = null;
 let cart = []; // {productId, name, price, quantity}
@@ -41,6 +50,11 @@ function renderUserInfo() {
 // AUTH ------------------------------------------------
 
 async function register() {
+    if (!API_BASE) {
+        showError('Demo mode: Authentication requires a backend server');
+        return;
+    }
+    
     const name = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
@@ -63,6 +77,11 @@ async function register() {
 }
 
 async function login() {
+    if (!API_BASE) {
+        showError('Demo mode: Authentication requires a backend server');
+        return;
+    }
+    
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
 
@@ -101,6 +120,12 @@ async function logout() {
 
 // Try to restore session on load
 async function loadCurrentUser() {
+    if (!API_BASE) {
+        currentUser = null;
+        renderUserInfo();
+        return;
+    }
+    
     try {
         const res = await fetch(`${API_BASE}/auth/me`, {
             method: 'GET',
@@ -121,11 +146,19 @@ async function loadCurrentUser() {
 
 async function loadProducts() {
     try {
+        // Use mock data if no backend available (GitHub Pages demo)
+        if (!API_BASE) {
+            renderProducts(MOCK_PRODUCTS);
+            return;
+        }
+        
         const res = await fetch(`${API_BASE}/products`);
         const products = await res.json();
         renderProducts(products);
     } catch (e) {
-        showError('Could not load products');
+        // Fallback to mock data if backend fails
+        console.warn('Backend unavailable, using mock data');
+        renderProducts(MOCK_PRODUCTS);
     }
 }
 

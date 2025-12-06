@@ -1,4 +1,8 @@
-const API_BASE = '/api';
+// Use deployed backend URL for GitHub Pages, localhost for local development
+const API_BASE = window.location.hostname === 'rehndev.github.io' 
+    ? 'https://your-backend-url.com/api'  // TODO: Replace with your deployed backend URL
+    : '/api';  // Local development
+
 let currentUser = null;
 let cart = []; // {productId, name, price, quantity}
 

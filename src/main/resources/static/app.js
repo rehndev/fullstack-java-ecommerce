@@ -1,11 +1,14 @@
-const DEPLOYED_BACKEND_URL = 'https://your-backend-url.com/api';
+// IMPORTANT: Update this to your actual deployed backend URL (e.g., hosted on Azure, Heroku, AWS, etc.)
+// Example: 'https://my-ecommerce-api.azurewebsites.net/api'
+const DEPLOYED_BACKEND_URL = 'https://your-deployed-backend-url.com/api';
+const USE_MOCK_API = true; // Set to false when you have a real backend
 
 const API_BASE = (() => {
     const hostname = window.location.hostname;
     const port = window.location.port;
     
     if (hostname.endsWith('.github.io') || hostname === 'github.io') {
-        return DEPLOYED_BACKEND_URL;
+        return USE_MOCK_API ? 'MOCK_API' : DEPLOYED_BACKEND_URL;
     }
     
     if (port === '8080' || (!port && (hostname === 'localhost' || hostname === '127.0.0.1'))) {
@@ -17,6 +20,33 @@ const API_BASE = (() => {
 
 let currentUser = null;
 let cart = [];
+
+// Mock API Data
+const MOCK_PRODUCTS = [
+    { id: 1, name: 'Wireless Headphones', description: 'High-quality sound with noise cancellation', price: 129.99, category: 'Electronics' },
+    { id: 2, name: 'Smart Watch', description: 'Track your fitness and stay connected', price: 199.99, category: 'Electronics' },
+    { id: 3, name: 'USB-C Cable', description: 'Fast charging and data transfer', price: 12.99, category: 'Accessories' },
+    { id: 4, name: 'Laptop Stand', description: 'Ergonomic aluminum stand for better posture', price: 34.99, category: 'Accessories' },
+    { id: 5, name: 'Mechanical Keyboard', description: 'RGB backlit with mechanical switches', price: 89.99, category: 'Electronics' },
+    { id: 6, name: 'Wireless Mouse', description: 'Precision tracking and long battery life', price: 39.99, category: 'Electronics' }
+];
+
+// Mock API function
+async function mockFetch(endpoint) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            if (endpoint === '/products') {
+                resolve({ ok: true, json: async () => MOCK_PRODUCTS });
+            } else if (endpoint.startsWith('/products/')) {
+                const id = parseInt(endpoint.split('/').pop());
+                const product = MOCK_PRODUCTS.find(p => p.id === id);
+                resolve({ ok: !!product, json: async () => product || { error: 'Not found' } });
+            } else {
+                resolve({ ok: false, status: 404 });
+            }
+        }, 300);
+    });
+}
 
 function initUI() {
     const cartToggle = document.getElementById('cart-toggle');
@@ -276,14 +306,19 @@ async function loadProducts() {
             return;
         }
         
-        const url = `${API_BASE}/products`;
-        const res = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include'
-        });
+        let res;
+        if (API_BASE === 'MOCK_API') {
+            res = await mockFetch('/products');
+        } else {
+            const url = `${API_BASE}/products`;
+            res = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            });
+        }
         
         if (!res.ok) {
             let errorText = '';

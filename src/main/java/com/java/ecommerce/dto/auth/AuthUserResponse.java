@@ -1,4 +1,3 @@
-// src/main/java/com/java/ecommerce/dto/auth/AuthUserResponse.java
 package com.java.ecommerce.dto.auth;
 
 import com.java.ecommerce.model.Role;
@@ -16,8 +15,6 @@ public class AuthUserResponse {
         this.email = email;
         this.role = role;
     }
-
-    // Getters
 
     public Long getId() {
         return id;

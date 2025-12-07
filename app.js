@@ -1,17 +1,24 @@
-// Use deployed backend URL for GitHub Pages, localhost for local development
-const API_BASE = window.location.hostname === 'rehndev.github.io' 
-    ? 'https://your-backend-url.com/api'  // TODO: Replace with your deployed backend URL
-    : '/api';  // Local development
+const DEPLOYED_BACKEND_URL = 'https://your-backend-url.com/api';
+
+const API_BASE = (() => {
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    
+    if (hostname.endsWith('.github.io') || hostname === 'github.io') {
+        return DEPLOYED_BACKEND_URL;
+    }
+    
+    if (port === '8080' || (!port && (hostname === 'localhost' || hostname === '127.0.0.1'))) {
+        return '/api';
+    }
+    
+    return 'http://localhost:8080/api';
+})();
 
 let currentUser = null;
-let cart = []; // {productId, name, price, quantity}
-
-// ============================================
-// UI INITIALIZATION
-// ============================================
+let cart = [];
 
 function initUI() {
-    // Cart drawer toggle
     const cartToggle = document.getElementById('cart-toggle');
     const cartClose = document.getElementById('cart-close');
     const cartDrawer = document.getElementById('cart-drawer');
@@ -32,7 +39,6 @@ function initUI() {
         document.body.style.overflow = '';
     }
     
-    // Auth modal toggle
     const authToggle = document.getElementById('auth-toggle');
     const authClose = document.getElementById('auth-close');
     const authModal = document.getElementById('auth-modal');
@@ -51,7 +57,6 @@ function initUI() {
         document.body.style.overflow = '';
     }
     
-    // Admin modal toggle
     const adminClose = document.getElementById('admin-close');
     const adminModal = document.getElementById('admin-modal');
     const adminOverlay = document.getElementById('admin-overlay');
@@ -64,17 +69,14 @@ function initUI() {
         document.body.style.overflow = '';
     }
     
-    // Auth tabs
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.dataset.tab;
             
-            // Update active tab button
             tabButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Update active form
             document.querySelectorAll('.auth-form').forEach(form => {
                 form.classList.remove('active');
             });
@@ -82,7 +84,6 @@ function initUI() {
         });
     });
     
-    // Close modals on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeCart();
@@ -92,12 +93,7 @@ function initUI() {
     });
 }
 
-// ============================================
-// UTILITIES
-// ============================================
-
 function showError(message) {
-    console.error(message);
     const existing = document.getElementById('error-toast');
     if (existing) existing.remove();
 
@@ -118,12 +114,7 @@ function showSuccess(message) {
     setTimeout(() => div.remove(), 3000);
 }
 
-// ============================================
-// USER INFO & AUTH
-// ============================================
-
 function renderUserInfo() {
-    const userInfo = document.getElementById('user-info');
     const authToggle = document.getElementById('auth-toggle');
     const logoutBtn = document.getElementById('logout-btn');
     const ordersSection = document.getElementById('orders-section');
@@ -149,7 +140,6 @@ function renderUserInfo() {
         ordersSection.classList.remove('hidden');
     }
     
-    // Show admin button if admin
     if (currentUser.role === 'ADMIN') {
         if (!document.getElementById('admin-toggle')) {
             const adminBtn = document.createElement('button');
@@ -171,10 +161,6 @@ function renderUserInfo() {
     }
 }
 
-// ============================================
-// AUTHENTICATION
-// ============================================
-
 async function register() {
     const name = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
@@ -195,11 +181,9 @@ async function register() {
             const err = await res.json().catch(() => ({}));
             throw new Error(err.error || 'Register failed');
         }
-        const user = await res.json();
+        await res.json();
         showSuccess('Registered successfully! You can now log in.');
-        // Switch to login tab
         document.querySelector('[data-tab="login"]')?.click();
-        // Clear form
         document.getElementById('reg-name').value = '';
         document.getElementById('reg-email').value = '';
         document.getElementById('reg-password').value = '';
@@ -232,7 +216,6 @@ async function login() {
         renderUserInfo();
         await loadOrders();
         
-        // Close modal and clear form
         document.getElementById('auth-modal')?.classList.remove('active');
         document.body.style.overflow = '';
         document.getElementById('login-email').value = '';
@@ -278,31 +261,88 @@ async function loadCurrentUser() {
     renderUserInfo();
 }
 
-// ============================================
-// PRODUCTS
-// ============================================
-
 async function loadProducts() {
+    const container = document.getElementById('products');
+    if (!container) {
+        return;
+    }
+    
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">Loading products...</div>';
+    
     try {
-        const res = await fetch(`${API_BASE}/products`);
+        if (!API_BASE) {
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--error);">API endpoint not configured. Please check your configuration.</div>';
+            return;
+        }
+        
+        const url = `${API_BASE}/products`;
+        
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        });
+        
+        if (!res.ok) {
+            let errorText = '';
+            try {
+                errorText = await res.text();
+            } catch (e) {
+                errorText = res.statusText;
+            }
+            throw new Error(`HTTP ${res.status}: ${errorText || res.statusText}`);
+        }
+        
         const products = await res.json();
+        
+        if (!products || !Array.isArray(products)) {
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--error);">Invalid products data received from server.</div>';
+            return;
+        }
+        
         renderProducts(products);
     } catch (e) {
-        showError('Could not load products');
+        let errorMsg = e.message || 'Unknown error';
+        
+        if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError') || e.message.includes('Network request failed')) {
+            errorMsg = 'Cannot connect to server. Make sure the Spring Boot backend is running on port 8080.';
+            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--error);">
+                <strong>Server Connection Error</strong><br>
+                ${errorMsg}<br><br>
+                <small style="color: var(--text-secondary);">
+                    To start the server, run: <code>mvn spring-boot:run</code> or start your Spring Boot application.
+                </small>
+            </div>`;
+        } else {
+            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--error);">
+                Could not load products: ${errorMsg}<br>
+                <small style="color: var(--text-secondary);">Check the browser console (F12) for more details.</small>
+            </div>`;
+        }
+        
+        showError(`Could not load products: ${errorMsg}`);
     }
 }
 
 function renderProducts(products) {
     const container = document.getElementById('products');
-    if (!container) return;
+    if (!container) {
+        return;
+    }
     
     container.innerHTML = '';
+    
+    if (!products || products.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">No products available at this time.</div>';
+        return;
+    }
 
     products.forEach(p => {
         const card = document.createElement('div');
         card.className = 'product-card';
         
-        // Image
         if (p.imageUrl) {
             const img = document.createElement('img');
             img.src = p.imageUrl;
@@ -318,13 +358,11 @@ function renderProducts(products) {
 
         const content = document.createElement('div');
         
-        // Name
         const name = document.createElement('div');
         name.className = 'product-name';
         name.textContent = p.name;
         content.appendChild(name);
         
-        // Description
         if (p.description) {
             const desc = document.createElement('div');
             desc.className = 'product-description';
@@ -332,19 +370,16 @@ function renderProducts(products) {
             content.appendChild(desc);
         }
         
-        // Price
         const price = document.createElement('div');
         price.className = 'product-price';
         price.textContent = `${parseFloat(p.price).toFixed(2)} €`;
         content.appendChild(price);
         
-        // Stock
         const stock = document.createElement('div');
         stock.className = 'product-stock';
         stock.textContent = `${p.stock} in stock`;
         content.appendChild(stock);
         
-        // Add to cart button
         const addBtn = document.createElement('button');
         addBtn.className = 'btn-primary';
         addBtn.textContent = 'Add to Cart';
@@ -354,16 +389,13 @@ function renderProducts(products) {
         };
         content.appendChild(addBtn);
         
-        // Admin actions
         if (currentUser && currentUser.role === 'ADMIN') {
-            // Edit button (click card to edit)
             card.onclick = () => {
                 fillProductForm(p);
                 document.getElementById('admin-modal')?.classList.add('active');
                 document.body.style.overflow = 'hidden';
             };
             
-            // Delete button
             const delBtn = document.createElement('button');
             delBtn.className = 'btn-secondary';
             delBtn.textContent = 'Delete';
@@ -517,7 +549,6 @@ async function checkout() {
         renderCart();
         await loadOrders();
         
-        // Close cart drawer
         document.getElementById('cart-drawer')?.classList.remove('active');
         document.getElementById('cart-overlay')?.classList.remove('active');
         document.body.style.overflow = '';
@@ -527,10 +558,6 @@ async function checkout() {
         showError(e.message);
     }
 }
-
-// ============================================
-// ORDERS
-// ============================================
 
 async function loadOrders() {
     if (!currentUser) return;
@@ -594,7 +621,6 @@ function renderOrders(orders) {
         });
         card.appendChild(list);
 
-        // Cancel button
         const actions = document.createElement('div');
         actions.className = 'order-actions';
         const canCancel = currentUser && (currentUser.role === 'ADMIN' || (currentUser.id === o.userId && o.status === 'NEW'));
@@ -634,10 +660,6 @@ async function cancelOrder(id) {
         showError(e.message);
     }
 }
-
-// ============================================
-// ADMIN PRODUCT MANAGEMENT
-// ============================================
 
 function fillProductForm(p) {
     document.getElementById('prod-id').value = p.id;
@@ -694,7 +716,6 @@ async function createOrUpdateProduct() {
         clearProductForm();
         await loadProducts();
         
-        // Close modal
         document.getElementById('admin-modal')?.classList.remove('active');
         document.body.style.overflow = '';
         
@@ -725,10 +746,6 @@ async function deleteProduct(id) {
         showError(e.message);
     }
 }
-
-// ============================================
-// INITIALIZATION
-// ============================================
 
 window.addEventListener('DOMContentLoaded', async () => {
     initUI();

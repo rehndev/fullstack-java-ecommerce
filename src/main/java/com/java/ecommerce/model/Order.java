@@ -15,7 +15,6 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // The customer that placed this order
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @JsonIgnore
@@ -29,13 +28,10 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
-    // Utility methods
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);
     }
-
-    // Getters/setters
 
     public Long getId() {
         return id;

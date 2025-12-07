@@ -10,9 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Simple JSON error responses for validation and business exceptions.
- */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

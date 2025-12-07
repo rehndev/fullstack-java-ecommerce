@@ -12,8 +12,6 @@ public class OrderItemRequest {
     @Min(1)
     private Integer quantity;
 
-    // Getters/setters
-
     public Long getProductId() {
         return productId;
     }

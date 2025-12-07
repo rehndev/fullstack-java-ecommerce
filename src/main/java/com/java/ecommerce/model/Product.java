@@ -31,8 +31,6 @@ public class Product {
     @Min(0)
     private Integer stock;
 
-    // Getters/setters
-
     public Long getId() {
         return id;
     }

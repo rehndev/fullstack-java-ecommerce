@@ -37,8 +37,7 @@ public class ProductController {
     @PostMapping
     public Product createProduct(@Valid @RequestBody ProductRequest req,
             HttpSession session) {
-        // Admin only
-        User admin = authContext.requireAdmin(session);
+        authContext.requireAdmin(session);
         return productService.create(req);
     }
 

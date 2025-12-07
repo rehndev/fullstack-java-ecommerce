@@ -15,13 +15,11 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Parent order
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     @JsonIgnore
     private Order order;
 
-    // Product snapshot link
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
@@ -30,11 +28,8 @@ public class OrderItem {
     @Min(1)
     private Integer quantity;
 
-    // Price at time of order
     @NotNull
     private BigDecimal unitPrice;
-
-    // Getters/setters
 
     public Long getId() {
         return id;

@@ -19,15 +19,12 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    // Stored hashed password
     @Column(nullable = false)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.CUSTOMER;
-
-    // Getters/setters
 
     public Long getId() {
         return id;

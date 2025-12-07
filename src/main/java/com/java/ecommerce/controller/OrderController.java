@@ -36,10 +36,8 @@ public class OrderController {
     public List<OrderResponse> getOrders(HttpSession session) {
         User user = authContext.requireUser(session);
         if (user.getRole() == Role.ADMIN) {
-            // Admin: all orders
             return orderService.findAllOrders();
         }
-        // Customer: only own orders
         return orderService.findOrdersForUser(user);
     }
 

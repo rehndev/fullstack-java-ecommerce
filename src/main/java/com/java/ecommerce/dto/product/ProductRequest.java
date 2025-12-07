@@ -1,4 +1,3 @@
-// src/main/java/com/java/ecommerce/dto/product/ProductRequest.java
 package com.java.ecommerce.dto.product;
 
 import jakarta.validation.constraints.Min;
@@ -23,8 +22,6 @@ public class ProductRequest {
     @NotNull
     @Min(0)
     private Integer stock;
-
-    // Getters/setters
 
     public String getName() {
         return name;

@@ -1,6 +1,3 @@
--- Seed data: creates an admin user and some example products
--- Password for admin: "secret" (SHA-256, base64)
-
 INSERT INTO users (id, name, email, password_hash, role)
 VALUES (1, 'Admin User', 'admin@example.com', 'K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=', 'ADMIN');
 

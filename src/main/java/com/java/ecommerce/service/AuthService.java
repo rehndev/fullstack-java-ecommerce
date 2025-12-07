@@ -21,7 +21,6 @@ public class AuthService {
 
     private final UserRepository userRepository;
 
-    // Simple session attribute keys
     public static final String SESSION_USER_ID = "USER_ID";
     public static final String SESSION_USER_ROLE = "USER_ROLE";
 
@@ -38,7 +37,7 @@ public class AuthService {
         user.setName(req.getName());
         user.setEmail(req.getEmail());
         user.setPasswordHash(hashPassword(req.getPassword()));
-        user.setRole(Role.CUSTOMER); // new users are customers by default
+        user.setRole(Role.CUSTOMER);
 
         User saved = userRepository.save(user);
         return new AuthUserResponse(saved.getId(), saved.getName(), saved.getEmail(), saved.getRole());
@@ -53,7 +52,6 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        // Store minimal data in HTTP session
         session.setAttribute(SESSION_USER_ID, user.getId());
         session.setAttribute(SESSION_USER_ROLE, user.getRole().name());
 
@@ -75,7 +73,6 @@ public class AuthService {
         return new AuthUserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole());
     }
 
-    // Helper: hash password using SHA-256 (for demo only; use BCrypt in real apps)
     private String hashPassword(String plain) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

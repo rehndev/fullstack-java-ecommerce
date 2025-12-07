@@ -1,4 +1,3 @@
-// src/main/java/com/java/ecommerce/dto/auth/LoginRequest.java
 package com.java.ecommerce.dto.auth;
 
 import jakarta.validation.constraints.Email;
@@ -12,8 +11,6 @@ public class LoginRequest {
 
     @NotBlank
     private String password;
-
-    // Getters/setters
 
     public String getEmail() {
         return email;

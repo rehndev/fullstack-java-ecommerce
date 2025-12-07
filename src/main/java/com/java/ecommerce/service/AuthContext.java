@@ -9,10 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * Helper to resolve the currently logged-in user from HttpSession
- * and to enforce CUSTOMER / ADMIN roles.
- */
 @Component
 public class AuthContext {
 

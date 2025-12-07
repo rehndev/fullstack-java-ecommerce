@@ -38,7 +38,6 @@ public class OrderService {
         order.setCreatedAt(Instant.now());
         order.setStatus(OrderStatus.NEW);
 
-        // For each item, verify product and stock
         for (OrderItemRequest itemReq : req.getItems()) {
             Product product = productRepository.findById(itemReq.getProductId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not found: " + itemReq.getProductId()));
@@ -48,7 +47,6 @@ public class OrderService {
                         "Not enough stock for product: " + product.getName());
             }
 
-            // Decrease stock
             product.setStock(product.getStock() - itemReq.getQuantity());
 
             OrderItem item = new OrderItem();
@@ -59,7 +57,6 @@ public class OrderService {
             order.addItem(item);
         }
 
-        // Save order and updated products
         Order saved = orderRepository.save(order);
         productRepository.saveAll(
                 saved.getItems().stream().map(OrderItem::getProduct).toList()
@@ -85,17 +82,14 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
 
-        // Only admin or the order owner can delete
         if (user.getRole() != Role.ADMIN && (order.getUser() == null || !order.getUser().getId().equals(user.getId()))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to delete this order");
         }
 
-        // If requester is a regular customer, only allow deleting NEW orders (cancellation)
         if (user.getRole() != Role.ADMIN && order.getStatus() != OrderStatus.NEW) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only NEW orders can be cancelled by the customer");
         }
 
-        // Restore stock for each item
         for (OrderItem item : order.getItems()) {
             Product product = item.getProduct();
             if (product != null) {
@@ -103,12 +97,10 @@ public class OrderService {
             }
         }
 
-        // Persist updated product stock
         productRepository.saveAll(
                 order.getItems().stream().map(OrderItem::getProduct).toList()
         );
 
-        // Delete the order (cascade will remove order items)
         orderRepository.delete(order);
     }
 

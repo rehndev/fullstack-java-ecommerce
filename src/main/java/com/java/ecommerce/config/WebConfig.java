@@ -1,7 +1,6 @@
 package com.java.ecommerce.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -33,8 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/static/")
-                .setOrder(Ordered.LOWEST_PRECEDENCE);
+                .addResourceLocations("classpath:/static/");
     }
     
     @Override

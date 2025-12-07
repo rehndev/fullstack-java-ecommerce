@@ -3,7 +3,6 @@ package com.java.ecommerce.controller;
 import com.java.ecommerce.dto.auth.AuthUserResponse;
 import com.java.ecommerce.dto.auth.LoginRequest;
 import com.java.ecommerce.dto.auth.RegisterRequest;
-import com.java.ecommerce.service.AuthContext;
 import com.java.ecommerce.service.AuthService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -14,11 +13,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final AuthContext authContext;
 
-    public AuthController(AuthService authService, AuthContext authContext) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.authContext = authContext;
     }
 
     @PostMapping("/register")

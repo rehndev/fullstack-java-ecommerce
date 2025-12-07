@@ -21,14 +21,13 @@ const API_BASE = (() => {
 let currentUser = null;
 let cart = [];
 
-// Mock API Data
+// Mock API Data - Products from SQL
 const MOCK_PRODUCTS = [
-    { id: 1, name: 'Wireless Headphones', description: 'High-quality sound with noise cancellation', price: 129.99, category: 'Electronics' },
-    { id: 2, name: 'Smart Watch', description: 'Track your fitness and stay connected', price: 199.99, category: 'Electronics' },
-    { id: 3, name: 'USB-C Cable', description: 'Fast charging and data transfer', price: 12.99, category: 'Accessories' },
-    { id: 4, name: 'Laptop Stand', description: 'Ergonomic aluminum stand for better posture', price: 34.99, category: 'Accessories' },
-    { id: 5, name: 'Mechanical Keyboard', description: 'RGB backlit with mechanical switches', price: 89.99, category: 'Electronics' },
-    { id: 6, name: 'Wireless Mouse', description: 'Precision tracking and long battery life', price: 39.99, category: 'Electronics' }
+    { id: 1, name: 'Invisible Keyboard', description: 'Perfect for typing imaginary emails', price: 9.99, image_url: 'https://via.placeholder.com/150', stock: 10 },
+    { id: 2, name: 'Wireless Extension Cord', description: '0% cables, 100% confusion', price: 14.50, image_url: 'https://via.placeholder.com/150', stock: 5 },
+    { id: 3, name: 'Decision Coin Flipper', description: 'Just blame the coin', price: 24.00, image_url: 'https://via.placeholder.com/150', stock: 8 },
+    { id: 4, name: 'Bug Spray for Software Bugs', description: 'Think your code has bugs? Just spray them away!', price: 24.00, image_url: 'https://via.placeholder.com/150', stock: 8 },
+    { id: 5, name: 'Add to Cart Button (Physical)', description: 'A physical button to add items to your cart', price: 15.00, image_url: 'https://via.placeholder.com/150', stock: 20 }
 ];
 
 // Mock API function
